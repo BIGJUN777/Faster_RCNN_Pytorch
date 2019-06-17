@@ -58,6 +58,9 @@ def argument():
     parse.add_argument('--rpn_sigma', type=int,
                         help='sigma for l1 smooth_loss : 3.',
                         default=3.)
+    parse.add_argument('--roi_sigma', type=int,
+                        help='sigma for l1 smooth_loss : 3.',
+                        default=1.)
 
     return parse.parse_args()
 

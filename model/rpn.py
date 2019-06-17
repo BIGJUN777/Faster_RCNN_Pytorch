@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from model.basestone import basestone
 from utils.anchor_generation import generate_anchor_base
 from .src.proposal_layer import ProposalLayer  
 from .src.anchor_target_layer import AnchorTargetLayer
@@ -19,8 +18,6 @@ class RegionProposalNetwork(nn.Module):
         super(RegionProposalNetwork,self).__init__()
 
         self.feat_stride = feat_stride
-        # define the featrue extractor
-        self.extractor = basestone()
         # define the conv layer to processing input feature map
         self.conv1 = nn.Conv2d(in_channel, mid_channel, 3, 1, 1, bias=True)
         # generate basic anchors
@@ -32,8 +29,6 @@ class RegionProposalNetwork(nn.Module):
         self.loc = nn.Conv2d(mid_channel, self.n_anchor * 4, 1, 1, 0) # 4(coords) * 9 (anchors)
         # define proposal layer
         self.proposal_layer = ProposalLayer(self, **proposal_creator_params)
-        # define anchor target layer
-        self.anchor_target_layer = AnchorTargetLayer(n_sample=256, pos_iou_thresh=0.7, neg_iou_thresh=0.3, pos_ratio=0.5)
         # initialize parameters
         normal_init(self.conv1, 0, 0.01)
         normal_init(self.score, 0, 0.01)
@@ -50,13 +45,12 @@ class RegionProposalNetwork(nn.Module):
         )
         return x
 
-    def forward(self, imgs, gt_bbox, scale=1.,rpn_only=True):
+    def forward(self, base_feature, gt_bbox, img_size, scale=1.):
         '''
         Args: 
              scale: default minimum size=16, need to ues scale to adjust min_size: min_size*scale;
         '''
-        # get feature map from the basic extractor
-        base_feature = self.extractor(imgs)
+
         # input the first conv(3X3)
         begin_feature = F.relu(self.conv1(base_feature))
         # forward the bg/fg classifier layer
@@ -69,22 +63,16 @@ class RegionProposalNetwork(nn.Module):
         # forward proposal layer to get rois and anchors shifted on the image
         batch_size, _, hh, ww = base_feature.shape
         feature_shape = (hh, ww)
-        imgs_size = imgs.shape[2:]
         rois, anchor = self.proposal_layer(rpn_locs_pred.cpu().data, rpn_scores_pred.cpu().data, self.anchor_base, 
-                                           batch_size, feature_shape, imgs_size, scale.numpy())
-        if rpn_only:
-            # get ground truth bounfing box regression coefficients as well as labels
-            # !NOTE: notice the shape of image, here should =3
-            gt_locs, gt_labels = self.anchor_target_layer(gt_bbox.cpu(), anchor.cpu(), imgs_size)
+                                           batch_size, feature_shape, img_size, scale.numpy())
 
-            # Transpose and reshape predicted bbox transformations to get them
-            # into the same order as the anchors(batch_size, K*9, 4); 
-            # the same processing to the original rpn_score(no passing sofmax()) for calculating loss;
-            rpn_locs_pred = rpn_locs_pred.permute(0,2,3,1).contiguous().reshape(batch_size, -1, 4)
-            rpn_scores_pred = rpn_scores_reshape.permute(0,2,3,1).contiguous().reshape(batch_size,-1,2)
-            return rpn_locs_pred, rpn_scores_pred, gt_locs, gt_labels
-        else:
-            return rois
+        # Transpose and reshape predicted bbox transformations to get them
+        # into the same order as the anchors(batch_size, K*9, 4); 
+        # the same processing to the original rpn_score(no passing sofmax()) for calculating loss;
+        rpn_locs_pred = rpn_locs_pred.permute(0,2,3,1).contiguous().reshape(batch_size, -1, 4)
+        rpn_scores_pred = rpn_scores_reshape.permute(0,2,3,1).contiguous().reshape(batch_size,-1,2)
+        return rois, anchor, rpn_locs_pred, rpn_scores_pred
+ 
 
 def normal_init(m, mean, stddev, truncated=False):
     """

@@ -1,5 +1,5 @@
 import numpy as np
-from utils.bbox_transform import loc2bbox, clip_boxes
+from utils.bbox_transform import  bbox_iou, bbox2loc
 
 class ProposalTargetCreator(object):
     """Assign ground truth bounding boxes to given RoIs.
@@ -85,6 +85,7 @@ class ProposalTargetCreator(object):
                 value 0 is the background.
 
         """
+        
         n_bbox, _ = bbox.shape
 
         roi = np.concatenate((roi, bbox), axis=0)

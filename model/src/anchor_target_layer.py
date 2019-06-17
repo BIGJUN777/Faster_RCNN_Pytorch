@@ -45,7 +45,7 @@ class AnchorTargetLayer(object):
         argmax_ious, label = self._create_label(inside_index, anchor, bbox)
 
         # compute bounding box regression targets
-        loc = bbox2loc(anchor, bbox[:,argmax_ious,:])
+        loc = bbox2loc(anchor[0], bbox[0,argmax_ious,:])
 
         # map up to original set of anchors
         label = _unmap(label, n_anchor, inside_index, fill=-1)

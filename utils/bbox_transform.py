@@ -45,15 +45,15 @@ def bbox2loc(src_bbox, dst_bbox):
 
     """
 
-    width = src_bbox[:, :, 2] - src_bbox[:, :, 0]
-    height = src_bbox[:, :, 3] - src_bbox[:, :, 1]
-    ctr_x = src_bbox[:, :, 0] + 0.5 * width
-    ctr_y = src_bbox[:, :, 1] + 0.5 * height
+    width = src_bbox[ :, 2] - src_bbox[ :, 0]
+    height = src_bbox[ :, 3] - src_bbox[ :, 1]
+    ctr_x = src_bbox[ :, 0] + 0.5 * width
+    ctr_y = src_bbox[ :, 1] + 0.5 * height
 
-    base_width = dst_bbox[:, :, 2] - dst_bbox[:, :, 0]
-    base_height = dst_bbox[:, :, 3] - dst_bbox[:, :, 1]
-    base_ctr_x = dst_bbox[:, :, 0] + 0.5 * base_width
-    base_ctr_y = dst_bbox[:, :, 1] + 0.5 * base_height
+    base_width = dst_bbox[ :, 2] - dst_bbox[ :, 0]
+    base_height = dst_bbox[ :, 3] - dst_bbox[ :, 1]
+    base_ctr_x = dst_bbox[ :, 0] + 0.5 * base_width
+    base_ctr_y = dst_bbox[ :, 1] + 0.5 * base_height
 
     # eps = xp.finfo(height.dtype).eps
     # height = xp.maximum(height, eps)
@@ -109,8 +109,8 @@ def bbox_iou(bbox_a, bbox_b):
 
     """
     
-    bbox_a = bbox_a.reshape((-1,4)).numpy()
-    bbox_b = bbox_b.reshape((-1,4)).numpy()
+    bbox_a = bbox_a.reshape((-1,4))
+    bbox_b = bbox_b.reshape((-1,4))
     if bbox_a.shape[1] != 4 or bbox_b.shape[1] != 4:
         raise IndexError
 

@@ -27,7 +27,6 @@ def pytorch_normalze(img):
     img = normalize((t.from_numpy(img)).float())
     return img.numpy()
 
-
 def caffe_normalize(img):
     """
     return appr -125-125 BGR

@@ -1,12 +1,29 @@
 # code based on chenyun
 # https://github.com/chenyuntc/simple-faster-rcnn-pytorch
 
+# import sys
+# sys.path.append('..')
 import torch 
 import torch.nn as nn
 from torchvision import models
 from utils.config import args
 
-def decompose_vgg16():
+class BaseStone(nn.Module):
+    '''
+    Faster R-CNN(FRRC) is based on popular CNN structure like: VGG; Resnet.
+    This class is aimed to bulid the extractor as the begining structure of FRRC
+    and classifier as the last structure of FRRC.
+    '''
+    def __init__(self, net='vgg16'):
+        super(BaseStone, self).__init__()
+        if net == 'vgg16':
+            self.extractor, self.classifier = _decompose_vgg16()
+        else:
+            pass
+    def forward(self, net ='vgg16'):
+        return self.extractor, self.classifier
+
+def _decompose_vgg16():
     '''
     decompose vgg16 into extractor and classifier
     '''
@@ -33,20 +50,5 @@ def decompose_vgg16():
 
     return features, classifier
 
-class basestone(nn.Module):
-    '''
-    Faster R-CNN(FRRC) is based on popular CNN structure like: VGG; Resnet.
-    This class is aimed to bulid the extractor as the begining structure of FRRC
-    and classifier as the last structure of FRRC.
-    '''
-    def __init__(self):
-        super(basestone, self).__init__()
-
-        if args.net == 'vgg16':
-            self.extractor, self.classifier = decompose_vgg16()
-        else:
-            pass
-
-    def forward(self, img):
-        return self.extractor(img)
-
+def _decompose_resnet():
+    pass
