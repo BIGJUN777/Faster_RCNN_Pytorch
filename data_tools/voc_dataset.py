@@ -5,7 +5,6 @@ import numpy as np
 
 from .util import read_image
 
-
 class VOCBboxDataset:
     """Bounding box dataset for PASCAL `VOC`_.
 
@@ -109,7 +108,6 @@ class VOCBboxDataset:
             # difficult, skipt it.
             if not self.use_difficult and int(obj.find('difficult').text) == 1:
                 continue
-
             difficult.append(int(obj.find('difficult').text))
             bndbox_anno = obj.find('bndbox')
             # subtract 1 to make pixel indexes 0-based

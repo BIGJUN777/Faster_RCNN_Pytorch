@@ -2,12 +2,11 @@ from __future__ import  absolute_import
 from __future__ import  division
 import torch as t
 from data_tools.voc_dataset import VOCBboxDataset
+from data_tools import util
 from skimage import transform as sktsf
 from torchvision import transforms as tvtsf
-from data_tools import util
 import numpy as np
 from utils.config import args
-
 
 def inverse_normalize(img):
     if args.caffe_pretrain:
@@ -101,8 +100,9 @@ class Dataset:
         self.tsf = Transform(args.min_img_size, args.max_img_size)
 
     def __getitem__(self, idx):
+        # get raw data from original database 
         ori_img, bbox, label, difficult = self.db.get_example(idx)
-
+        # pre-process data: resize
         img, bbox, label, scale = self.tsf((ori_img, bbox, label))
         # TODO: check whose stride is negative to fix this instead copy all
         # some of the strides of a given numpy array are negative.
@@ -124,3 +124,17 @@ class TestDataset:
 
     def __len__(self):
         return len(self.db)
+
+if __name__ == "__main__":
+    import sys
+    sys.path.append("..")
+    import cv2
+    trainloader = Dataset(args)
+    testloader = TestDataset(args)
+    train = iter(trainloader)
+    test = iter(testloader)
+    import ipdb; ipdb.set_trace()
+    img, bbox, label, scale = next(train)
+    ori_img = inverse_normalize(img[0].numpy())
+    cv2.imshow('img', img[0].cpu().numpy().transpose(1,2,0))
+    cv2.waitKey(100)

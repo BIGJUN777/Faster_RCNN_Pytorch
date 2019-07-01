@@ -61,6 +61,12 @@ def argument():
     parse.add_argument('--roi_sigma', type=int,
                         help='sigma for l1 smooth_loss : 3.',
                         default=1.)
+    parse.add_argument('--plot_every', type=int,
+                        help='plot something through visdom every "plot_every" iteration: 50',
+                        default=50)
+    parse.add_argument('--log_dir',type=str,
+                        help='path to save log data',
+                        default='./log')   
 
     return parse.parse_args()
 

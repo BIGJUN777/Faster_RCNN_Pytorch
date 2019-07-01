@@ -64,7 +64,7 @@ class RegionProposalNetwork(nn.Module):
         batch_size, _, hh, ww = base_feature.shape
         feature_shape = (hh, ww)
         rois, anchor = self.proposal_layer(rpn_locs_pred.cpu().data, rpn_scores_pred.cpu().data, self.anchor_base, 
-                                           batch_size, feature_shape, img_size, scale.numpy())
+                                           batch_size, feature_shape, img_size, scale)
 
         # Transpose and reshape predicted bbox transformations to get them
         # into the same order as the anchors(batch_size, K*9, 4); 

@@ -19,7 +19,7 @@ class BaseStone(nn.Module):
         if net == 'vgg16':
             self.extractor, self.classifier = _decompose_vgg16()
         else:
-            pass
+            self.extractor, self.classifier = _decompose_resnet()
     def forward(self, net ='vgg16'):
         return self.extractor, self.classifier
 

@@ -1,2 +1,3 @@
 *.pyc
-
+/database/VOCdevkit2007
+/log/
