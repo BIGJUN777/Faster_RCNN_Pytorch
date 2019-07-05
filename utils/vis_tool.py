@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw
 
 # VOC_BBOX_LABEL_NAMES
 VOC_BBOX_LABEL_NAMES = list([
+    # 'bg',
     'plane',
     'bike',
     'bird',
@@ -37,6 +38,7 @@ VOC_BBOX_LABEL_NAMES = list([
 VOC_BBOX_LABEL_NAMES += 'bg' # add background
 
 COLORS = {
+    # 'bg': (24,11,162),   
     'plane': (72,255,67),
     'bike': (103,20,172),
     'bird': (204,43,66),
@@ -56,8 +58,7 @@ COLORS = {
     'sheep': (5,11,183),
     'sofa': (243,124,89),
     'train': (183,51,82),
-    'tv': (248,175,142),
-    'bg': (24,11,162)    
+    'tv': (248,175,142), 
     }
 
 def vis_img(img, bboxs, labels, scores=None):
@@ -65,20 +66,27 @@ def vis_img(img, bboxs, labels, scores=None):
     img = Image.fromarray(img.transpose(1,2,0).astype("uint8"))
     try:
         if len(bboxs) == 0:
-            return img     
-        num = 0 
-        width = 3
+            return img    
+
+        if scores is not None:
+            keep = np.where(scores > 0.3)
+            bboxs = bboxs[keep]
+            labels = labels[keep]
+            scores = scores[keep] 
+        
+        score_idx = 0 
+        line_width = 3
         for (bbox, label) in zip(bboxs, labels):
             Drawer = ImageDraw.Draw(img)
             # ipdb.set_trace()
-            Drawer.rectangle(list(bbox), outline=COLORS[VOC_BBOX_LABEL_NAMES[label]], width=width)
+            Drawer.rectangle(list(bbox), outline=COLORS[VOC_BBOX_LABEL_NAMES[label]], width=line_width)
             text = VOC_BBOX_LABEL_NAMES[label]
             if scores is None:
-                Drawer.text((bbox[0]+width+1, bbox[1]+width+1), text, COLORS[VOC_BBOX_LABEL_NAMES[label]])
+                Drawer.text((bbox[0]+line_width+1, bbox[1]+line_width+1), text, COLORS[VOC_BBOX_LABEL_NAMES[label]])
             else:
-                text = text + " " + '{:.3f}'.format(scores[num])
-                Drawer.text((bbox[0]+width+1, bbox[1]+width+1), text, COLORS[VOC_BBOX_LABEL_NAMES[label]], )
-                num +=1
+                text = text + " " + '{:.3f}'.format(scores[score_idx])
+                Drawer.text((bbox[0]+line_width+1, bbox[1]+line_width+1), text, COLORS[VOC_BBOX_LABEL_NAMES[label]], )
+                score_idx +=1
         return img
     except Exception as e:
         print("Error:" ,e)

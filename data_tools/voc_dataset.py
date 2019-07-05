@@ -133,6 +133,7 @@ class VOCBboxDataset:
 
 
 VOC_BBOX_LABEL_NAMES = (
+    # 'background',
     'aeroplane',
     'bicycle',
     'bird',

@@ -1,3 +1,7 @@
 *.pyc
-/database/VOCdevkit2007
-/log/
+data_tools/*.pyc
+model/*.pyc
+utils/*pyc
+database/VOCdevkit2007
+log/
+checkpoints/
