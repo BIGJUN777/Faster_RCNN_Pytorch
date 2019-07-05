@@ -2,23 +2,23 @@ import numpy as np
 import torch
 from torch import optim
 import torch.nn.functional as F
+import torchvision
 # from utils.eval_tool import eval_detection_voc
 from utils.vis_tool import vis_img
 from data_tools.dataset import Dataset, TestDataset, inverse_normalize
 from model.faster_rcnn import Faster_RCNN, evalute
+from utils.utils import collate_fn
 
 import os
-import cv2
 import ipdb
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
+import argparse
 
-from utils.utils import collate_fn
-import torchvision
+def run_network(args):
 
-def run_network():
     dataset = Dataset(data_dir='database/VOCdevkit2007/VOC2007')
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=collate_fn)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
     testset = TestDataset(data_dir='database/VOCdevkit2007/VOC2007')
     testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, collate_fn=collate_fn)
     print('data prepared, train data: %d, test data: %d' % (len(dataset), len(testset)))
@@ -36,6 +36,8 @@ def run_network():
     writer = SummaryWriter(log_dir='log')
 
     for epoch in range(100):
+        loss_epoch = {}
+        loss_name = ['loss_classifier', 'loss_box_reg', 'loss_objectness', 'loss_rpn_box_reg']
         for ii, (images, targets) in tqdm(enumerate(dataloader)):   
             model.train()
             model.zero_grad()
@@ -47,9 +49,16 @@ def run_network():
             losses.backward()
             optimizer.step()
 
+            if ii == 0:
+                for name in loss_name:
+                    loss_epoch[name] = loss_dict[name].item() * args.batch_size
+            else:
+                for name in loss_name:
+                    loss_epoch[name] += loss_dict[name].item() * args.batch_size
+
             # print(loss_dicts)
             # plot image
-            if (ii == 0) or ((ii+1) % 50) == 0:
+            if (ii == 0) or ((ii+1) % 10) == 0:
                 # ipdb.set_trace()
                 ori_img = inverse_normalize(images[0].cpu().numpy())
                 # plot original image
@@ -63,26 +72,11 @@ def run_network():
                 img = vis_img(ori_img, outputs[0]['boxes'].cpu().numpy(), outputs[0]['labels'].cpu().numpy(), outputs[0]['scores'].cpu().numpy())
                 writer.add_image('pre_images', np.array(img).transpose(2,0,1), ii)
 
-            writer.add_scalars('loss', loss_dict, ii)
-        lr_scheduler.step()
-        # testing
-        # for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(testloader)):
-        #     model.eval()
-        #     with torch.no_grad():
-        #         sizes = [sizes[0][0].item(), sizes[1][0].item()]
-        #         pred_bboxes_, pred_labels_, pred_scores_ = model.predict(imgs.to(device), [sizes])
-        #         gt_bboxes += list(gt_bboxes_.numpy())
-        #         gt_labels += list(gt_labels_.numpy())
-        #         gt_difficults += list(gt_difficults_.numpy())
-        #         pred_bboxes += pred_bboxes_
-        #         pred_labels += pred_labels_
-        #         pred_scores += pred_scores_
-        #     # if ii == 500: break
+            for k, v in loss_epoch.items():
+                loss_epoch[k] = v /len(dataset)
 
-        # test_result = eval_detection_voc(
-        #     pred_bboxes, pred_labels, pred_scores,
-        #     gt_bboxes, gt_labels, gt_difficults,
-        #     use_07_metric=True)
+            writer.add_scalars('loss', loss_epoch, epoch)
+        lr_scheduler.step()
 
         # save checkpoints
         if not os.path.exists('./checkpoints'):
@@ -91,4 +85,10 @@ def run_network():
             torch.save(model.state_dict(), './checkpoints/checkpoint_{}_epochs.pth'.format(epoch))
 
 if __name__ == "__main__":
-    run_network()
+
+    parse = argparse.ArgumentParser(description="faster-rcnn")
+    parse.add_argument('--batch_size', type=int, default=1,
+                        help="batch_size: 1")
+    args = parse.parse_args()
+
+    run_network(args)
