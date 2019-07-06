@@ -7,6 +7,7 @@ from skimage import transform as sktsf
 from torchvision import transforms as tvtsf
 import numpy as np
 import torch
+import ipdb
 
 def inverse_normalize(img, caffe_pretrain=False):
     if caffe_pretrain:
@@ -99,11 +100,13 @@ class Dataset:
         # get raw data from original database 
         ori_img, bbox, label, difficult = self.db.get_example(idx)
         # pre-process data: resize
+        
         img, bbox, label = self.tsf((ori_img, bbox, label))
         # convert everything into a torch.Tensor
         bbox = torch.as_tensor(bbox, dtype=torch.float32)
         label = torch.as_tensor(label, dtype=torch.int64)
         img = torch.from_numpy(img.clip(min=0, max=1))
+        # ipdb.set_trace()
         target = {}
         target['boxes'] = bbox
         target['labels'] = label

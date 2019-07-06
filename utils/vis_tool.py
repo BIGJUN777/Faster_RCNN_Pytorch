@@ -4,7 +4,7 @@ import ipdb
 import numpy as np
 import matplotlib
 import torch as t
-import visdom
+# import visdom
 import cv2
 
 matplotlib.use('Agg')
@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 
 # VOC_BBOX_LABEL_NAMES
 VOC_BBOX_LABEL_NAMES = list([
-    # 'bg',
+    'bg',
     'plane',
     'bike',
     'bird',
@@ -35,10 +35,8 @@ VOC_BBOX_LABEL_NAMES = list([
     'train',
     'tv'])
 
-VOC_BBOX_LABEL_NAMES += 'bg' # add background
-
 COLORS = {
-    # 'bg': (24,11,162),   
+    'bg': (24,11,162),   
     'plane': (72,255,67),
     'bike': (103,20,172),
     'bird': (204,43,66),
@@ -69,7 +67,7 @@ def vis_img(img, bboxs, labels, scores=None):
             return img    
 
         if scores is not None:
-            keep = np.where(scores > 0.3)
+            keep = np.where(scores > 0.7)
             bboxs = bboxs[keep]
             labels = labels[keep]
             scores = scores[keep] 

@@ -1,11 +1,32 @@
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.rpn import AnchorGenerator
 import torch
 
 
-
 def Faster_RCNN(num_classes):
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+
+    anchor_genreator = AnchorGenerator(sizes=(128, 256, 512), aspect_ratios=(0.5, 1.0, 2.0))
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True, 
+                                                                 min_size=600, 
+                                                                 max_size=1000,
+                                                                #  rpn_anchor_generator=anchor_genreator,
+                                                                 rpn_pre_nms_top_n_train=12000, 
+                                                                 rpn_pre_nms_top_n_test=6000,
+                                                                 rpn_post_nms_top_n_train=2000, 
+                                                                 rpn_post_nms_top_n_test=300,
+                                                                 rpn_nms_thresh=0.7,
+                                                                 rpn_fg_iou_thresh=0.7, 
+                                                                 rpn_bg_iou_thresh=0.3,
+                                                                 rpn_batch_size_per_image=256, 
+                                                                 rpn_positive_fraction=0.5,
+                                                                 box_batch_size_per_image=128, 
+                                                                 box_positive_fraction=0.25,
+                                                                 box_score_thresh=0.1, 
+                                                                 box_nms_thresh=0.5, 
+                                                                 box_detections_per_img=100)
+
+    model.rpn.anchor_genreator = anchor_genreator
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes) 
 
