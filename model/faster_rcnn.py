@@ -7,6 +7,9 @@ import torch
 def Faster_RCNN(num_classes):
 
     anchor_genreator = AnchorGenerator(sizes=(128, 256, 512), aspect_ratios=(0.5, 1.0, 2.0))
+    roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=[0],
+                                                    output_size=7,
+                                                    sampling_ratio=2)
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True, 
                                                                  min_size=600, 
                                                                  max_size=1000,
@@ -23,10 +26,11 @@ def Faster_RCNN(num_classes):
                                                                  box_batch_size_per_image=128, 
                                                                  box_positive_fraction=0.25,
                                                                  box_score_thresh=0.1, 
-                                                                 box_nms_thresh=0.5, 
+                                                                 box_nms_thresh=0.3, 
                                                                  box_detections_per_img=100)
 
     model.rpn.anchor_genreator = anchor_genreator
+    model.roi_heads.roi_pooler = roi_pooler
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes) 
 

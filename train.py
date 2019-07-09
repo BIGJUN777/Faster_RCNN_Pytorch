@@ -5,7 +5,9 @@ import torch.nn.functional as F
 import torchvision
 # from utils.eval_tool import eval_detection_voc
 from utils.vis_tool import vis_img
-from data_tools.dataset import Dataset, TestDataset, inverse_normalize
+# from data_tools.dataset import Dataset, TestDataset, inverse_normalize
+from data_tools.dataset import inverse_normalize
+from data_tools.dataset import get_voc
 from model.faster_rcnn import Faster_RCNN, evalute
 from utils.utils import collate_fn
 
@@ -18,19 +20,23 @@ import argparse
 
 def run_network(args):
 
-    dataset = Dataset(data_dir='database/VOCdevkit2007/VOC2007')
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
-    testset = TestDataset(data_dir='database/VOCdevkit2007/VOC2007')
-    testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, collate_fn=collate_fn)
-    print('data prepared, train data: %d, test data: %d' % (len(dataset), len(testset)))
+    # dataset = Dataset(data_dir='database/VOCdevkit2007/VOC2007')
+    # dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
+    # testset = TestDataset(data_dir='database/VOCdevkit2007/VOC2007')
+    # testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, collate_fn=collate_fn)
+    # print('data prepared, train data: %d, test data: %d' % (len(dataset), len(testset)))
 
+    dataset = get_voc('database', 'trainval', )
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
+    print('data prepared, train data: %d' % len(dataset))
     model = Faster_RCNN(num_classes=21)
     device = torch.device('cuda:0' if torch.cuda.is_available() and args.gpu else 'cpu')
     model.to(device)
     print('model construct completed. Training on %s' % device)
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    optimizer = optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+    
+    # optimizer = optim.Adam(model.parameters(), lr=0.005)
+    optimizer = optim.SGD(params, lr=0.0001, momentum=0.9, weight_decay=0.0005)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
     # setup log data writer
     if not os.path.exists('log'):
