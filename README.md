@@ -71,3 +71,12 @@ In the following, we briefly introduce some main scripts.
 - `train.py`: script to train the model;
 - `eval.py`: script to evalute the trained model;
 - `utils/vis_tool.py`: script to visualize the detection results;
+
+<!---------------------------------------------------------------------------------------------------------------->
+## Getting Started
+### Instruction
+1. Clone this repository.
+  ```git clone https://github.com/BIGJUN777/VS-GATs.git```
+  ```git checkout v1.0```
+  
+2. Install Python dependencies:
