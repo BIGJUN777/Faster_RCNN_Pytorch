@@ -26,28 +26,48 @@ we study the disambiguating power of subsidiary scene relations via a <b>double 
 <!---------------------------------------------------------------------------------------------------------------->
 ## Graph
 ### Preliminary
-<p><font size='4'>A graph $G$ is defined as $G=(V, E)$ that consists of a set of $V$ nodes and a set of $E$ edges. Node features and edge features are denoted by $\mathbf{h}_v$ and $\mathbf{h}_e$ respectively. Let $v_i \in V$  be the $ith$ node and $e_{i,j}=(v_i,v_j) \in E$ be the directed edge from $v_i$ to $v_j$.</font></p>
+A graph $G$ is defined as $G=(V, E)$ that consists of a set of $V$ nodes and a set of $E$ edges. Node features and edge features are denoted by $\mathbf{h}_v$ and $\mathbf{h}_e$ respectively. Let $v_i \in V$  be the $ith$ node and $e_{i,j}=(v_i,v_j) \in E$ be the directed edge from $v_i$ to $v_j$.
 
-<p><font size='4'>A graph with $n$ nodes has a node features matrix $\mathbf{X}_v \in \mathbf{R}^{n \times d}$ and an edge feature matrix $ \mathbf{X}_e \in \mathbf{R}^{m \times c} $ where $\mathbf{h}_{v_i} \in \mathbf{R}^d$ is the feature vector of node $i$ and $\mathbf{h}_{e_{i,j}} \in \mathbf{R}^c $ is the feature vector of edge $(i,j)$. Fully connected edges imply $e_{i,j} \neq e_{j,i}$. </font></p>
+A graph with $n$ nodes has a node features matrix $\mathbf{X}_v \in \mathbf{R}^{n \times d}$ and an edge feature matrix $ \mathbf{X}_e \in \mathbf{R}^{m \times c} $ where $\mathbf{h}_{v_i} \in \mathbf{R}^d$ is the feature vector of node $i$ and $\mathbf{h}_{e_{i,j}} \in \mathbf{R}^c $ is the feature vector of edge $(i,j)$. Fully connected edges imply $e_{i,j} \neq e_{j,i}$. 
 
-### DGL Basics
-<p><font size='4'><a href='https://docs.dgl.ai/en/latest/install/index.html'>DGL</a> is a Python package dedicated to deep learning on graphs, built atop existing tensor DL frameworks (e.g. Pytorch, MXNet) and simplifying the implementation of graph-based neural networks.</font></p>
+### DGL
+<a href='https://docs.dgl.ai/en/latest/install/index.html'>DGL</a> is a Python package dedicated to deep learning on graphs, built atop existing tensor DL frameworks (e.g. Pytorch, MXNet) and simplifying the implementation of graph-based neural networks.
 
 <!---------------------------------------------------------------------------------------------------------------->
 ## Code Overview
-In this project, there are three main folders: 
+In this project, we implement our method using the Pytorch and DGL library and there are three main folders: 
 
 - `datasets/`: contains codes to prepare the train/test data;
 - `model/`: contains codes to constructe the model;
 - `result/`: contains codes to evalute the model;
 
-In the following, we 
-### Features Generation
-<p><font size='4'>Main file :<code>hico_process.sh</code></font></p>
+In the following, we briefly introduce some main scripts.
 
-<ol>
-    <li><font size='4'><b>Visual Features</b>:<code>run_faster_rcnn.py  select_confident_boxes.py  hico_train_val_test_data.py</code></font></li>
-    <li><font size='4'><b>Spatial Features</b>:<code>spatial_feature.py</code></font></li>
-    <li><font size='4'><b>Word embeddings</b>:<code>hico_word2vec.py</code></font></li>
-</ol>
+#### datasets/
+- `hico_process.sh`: the file that includes all comments to prepare for train/test data;
+- `hico_constants.py` and `metadata.py`: configuration files;
+- `hico_mat_to_json.py`: script to convert the original dataset `*.mat` files to `*.json` files;
+- `hico_hoi_cls_count.py`: script to count the training samples of each HOI category;
+- `hico_split_ids.py`: script to split the dataset into train/valuation/test dataset;
+- `run_faster_rcnn.py`: script to run Faster R-CNN to save the object detection data;
+- `select_confident_boxes.py`: script to select the confident detection boxes exceed the thresholds;
+- `evaluate_instance_detection.py`: script to evalute the detection results(You can skim this script);
+- `hico_train_val_test_data.py`: script to prepare the train/val/test data by matching the object detection result with ground-truth data;
+- `hico_word2vec.py`: script to prepare the word embedding features;
+- `spatial_feature.py`: script to prepare the spatial features;
 
+#### model/
+- `config.py`: configuration file;
+- `model.py`: script to construct the whole model which include two main part: *graph networks* and *readout network*;
+- `grnn.py`: script to construct the graph networks;
+- `utils.py`: script to consturct the MLPs;
+
+#### result/
+- `hico_eval.sh`: the file that includes all comments to get the evaluation result;
+- `compute_map.py`: script to calculate the map for each HOI category based on the HOI detection results;
+- `sample_analysis.py`: script to calculate the mAP for *Full*, *Rare*, *Non-Rare*;
+
+#### others
+- `train.py`: script to train the model;
+- `eval.py`: script to evalute the trained model;
+- `utils/vis_tool.py`: script to visualize the detection results;
