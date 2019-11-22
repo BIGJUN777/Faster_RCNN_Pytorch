@@ -76,7 +76,9 @@ In the following, we briefly introduce some main scripts.
 ## Getting Started
 ### Instruction
 1. Clone this repository.
+
   ```git clone https://github.com/BIGJUN777/VS-GATs.git```
+  
   ```git checkout v1.0```
   
 2. Install Python dependencies:
