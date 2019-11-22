@@ -75,10 +75,40 @@ In the following, we briefly introduce some main scripts.
 <!---------------------------------------------------------------------------------------------------------------->
 ## Getting Started
 ### Instruction
-1.Clone this repository.
+1. Clone this repository.
 ```
 git clone https://github.com/BIGJUN777/VS-GATs.git
 git checkout v1.0
 ```
   
 2. Install Python dependencies:
+**Our method are bulit atop Pytorch1.1.0 and DGL0.3.**
+```
+pip install -r requirements.txt
+```
+
+### Prepare Data
+#### Download original data
+1. Download the original [HICO-DET](http://www-personal.umich.edu/~ywchao/hico/) dataset.
+
+#### Process Data
+1. You can directly download our processed data from [Here]() and put it into `datasets/`.
+2. If you want to finish it by yourself, you first need to download two files from [Here]() and put them into the implemented folder of Faster R-CNN(*e.g. `~/anaconda3/envs/py3_test/lib/python3.6/site-packages/torchvision/models/detection/`*) because we slightly modify the related code to save the desired visual features(We recommend you to backup the origial code first). And you can run the following commend:
+```
+bash datasets/hico_process.sh
+```
+
+### Training
+There are several options we can set when training the model. See the `train.py` for more details.
+```
+python train.py --e_v='vs_gats_train' --t_m='epoch' --b_s=32 --f_t='fc7' --layers=1 --bn=False --lr=0.00001 --drop_prob=0.3  --m_a='false' --d_a='false' --bias='true' --optim='adam' --diff_edge='false' 
+```
+You can visualized the training process through tensorboard: `tensorboard --logdir='log'`
+### Testing
+We choose the checkpoint with low loss in valuation dataset(always about 250 epochs).
+```
+bash result/hico_eval.sh 'final_ver' 'path_to_the_checkpoint_file'
+```
+
+### Acknowledgement
+In this project, 
