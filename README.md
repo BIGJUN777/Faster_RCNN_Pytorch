@@ -105,10 +105,10 @@ python train.py --e_v='vs_gats_train' --t_m='epoch' --b_s=32 --f_t='fc7' --layer
 ```
 You can visualized the training process through tensorboard: `tensorboard --logdir='log'`
 ### Testing
-We choose the checkpoint with low loss in valuation dataset(always about 250 epochs).
+We choose the checkpoint with low loss in valuation dataset(always about 250 epochs. You can use this [checkpoint]() to reproduce the detection result in our paper.).
 ```
 bash result/hico_eval.sh 'final_ver' 'path_to_the_checkpoint_file'
 ```
 
 ### Acknowledgement
-In this project, 
+In this project, some codes which process the data and eval the model are built upon [ECCV2018-Learning Human-Object Interactions by Graph Parsing Neural Networks](https://github.com/SiyuanQi/gpnn) and [ICCV2019-No-Frills Human-Object Interaction Detection: Factorization, Layout Encodings, and Training Techniques](https://github.com/BigRedT/no_frills_hoi_det). Thanks them for their great works.
